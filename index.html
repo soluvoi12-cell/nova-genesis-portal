@@ -137,7 +137,7 @@
       
       <div class="input-group">
         <label>USERNAME</label>
-        <input type="text" id="username" placeholder="Enter Username">
+        <input type="text" id="username" placeholder="Enter Username (e.g. SHAILENDRA)">
       </div>
       
       <div class="input-group">
@@ -171,19 +171,20 @@
   </div>
 
   <script>
-    let usersList = [];
+    // ========================================================
+    // TERE CSV FILE SE LOAD KIYE GAYE USERS LIST
+    // ========================================================
+    const usersList = [
+      { username: "SHAILENDRA", pass: "BSC3RDSEM", name: "Shailendra", id: "NOVAGEN.001" },
+      { username: "LAISA", pass: "BSC3RDSEM", name: "Laisa", id: "NOVAGEN.002" },
+      { username: "TUSHAR", pass: "BSC3RDSEM", name: "Tushar", id: "NOVAGEN.003" },
+      { username: "NEERAJ", pass: "BSC3RDSEM", name: "Neeraj", id: "NOVAGEN.004" },
+      { username: "SURAJ", pass: "BSC3RDSEM", name: "Suraj", id: "NOVAGEN.005" }
+    ];
+
     let currentUser = null;
 
-    // Load 400 Users Database from users.json
-    fetch('users.json')
-      .then(response => response.json())
-      .then(data => {
-        usersList = data;
-        console.log("Users Database Loaded Successfully!");
-      })
-      .catch(err => console.error("Error loading users.json:", err));
-
-    // Particle Canvas Animation
+    // Background Particle Animation
     const bgCanvas = document.getElementById('bg-canvas');
     const ctxBg = bgCanvas.getContext('2d');
     let particles = [];
@@ -220,12 +221,12 @@
     }
     animateParticles();
 
-    // Login Action
+    // Case-Insensitive Login Handling
     function handleLogin() {
-      const u = document.getElementById("username").value.trim();
+      const u = document.getElementById("username").value.trim().toUpperCase();
       const p = document.getElementById("password").value.trim();
       
-      const user = usersList.find(x => String(x.username).trim() === u && String(x.pass).trim() === p);
+      const user = usersList.find(x => x.username.toUpperCase() === u && x.pass === p);
 
       if (user) {
         currentUser = user;
@@ -255,7 +256,7 @@
       }
     }
 
-    // Photo Render
+    // Photo Render & Pass Generator
     document.getElementById("photoInput").addEventListener("change", function(e) {
       if(!e.target.files[0]) return;
       
@@ -279,7 +280,7 @@
             // Draw User Photo
             ctx.drawImage(userPhoto, 115, 345, 350, 420);
 
-            // Draw Name and ID
+            // Draw Name and ID on Pass
             ctx.fillStyle = "#FFD700";
             ctx.font = "bold 38px Poppins";
             ctx.fillText(currentUser.name, 540, 415);
