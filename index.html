@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NOVA GENESIS 2026 - Access Portal</title>
   
-  <!-- Cool Fonts & Animation Libraries -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -23,7 +22,6 @@
       overflow-x: hidden;
     }
 
-    /* Particle Background Canvas */
     #bg-canvas {
       position: fixed;
       top: 0; left: 0;
@@ -39,7 +37,6 @@
       text-align: center;
     }
 
-    /* Glassmorphism Card Box */
     .glass-card {
       background: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(16px);
@@ -67,7 +64,6 @@
       letter-spacing: 1px;
     }
 
-    /* Input Styles */
     .input-group { margin-bottom: 20px; text-align: left; }
     .input-group label { display: block; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
     .input-group input {
@@ -86,7 +82,6 @@
       box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
     }
 
-    /* Glowing Button */
     .btn {
       width: 100%;
       padding: 14px;
@@ -106,7 +101,6 @@
       box-shadow: 0 0 25px rgba(0, 229, 255, 0.8);
     }
 
-    /* Portal Screen (Hidden initially) */
     #portal-screen { display: none; opacity: 0; }
     
     #passCanvas {
@@ -136,7 +130,7 @@
 
   <div class="container">
     
-    <!-- LOGIN BOX -->
+    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="glass-card">
       <h1 class="title">NOVA GENESIS</h1>
       <p class="subtitle">OFFICIAL ENTRY PASS PORTAL</p>
@@ -152,10 +146,10 @@
       </div>
       
       <button class="btn" onclick="handleLogin()">ACCESS PASS 🚀</button>
-      <p id="error-msg" style="color:#ff4757; font-size:0.8rem; margin-top:10px; display:none;">Invalid Credentials!</p>
+      <p id="error-msg" style="color:#ff4757; font-size:0.8rem; margin-top:10px; display:none;">Invalid Username or Password!</p>
     </div>
 
-    <!-- MAIN PORTAL SCREEN (After Login Animation) -->
+    <!-- MAIN PORTAL SCREEN -->
     <div id="portal-screen" class="glass-card">
       <h2 id="welcome-text" class="title" style="font-size: 1.3rem;"></h2>
       <p class="subtitle">Upload profile photo to generate pass</p>
@@ -177,16 +171,19 @@
   </div>
 
   <script>
-    // 1. Database of 400 Users (Add/Expand as needed)
-    const usersList = [
-      { username: "user01", pass: "pass123", name: "Rahul Sharma", id: "NG2026-001" },
-      { username: "user02", pass: "pass456", name: "Priya Singh", id: "NG2026-002" },
-      { username: "user03", pass: "pass789", name: "Aman Verma", id: "NG2026-003" }
-    ];
-
+    let usersList = [];
     let currentUser = null;
 
-    // 2. Background Star Particle Effect
+    // Load 400 Users Database from users.json
+    fetch('users.json')
+      .then(response => response.json())
+      .then(data => {
+        usersList = data;
+        console.log("Users Database Loaded Successfully!");
+      })
+      .catch(err => console.error("Error loading users.json:", err));
+
+    // Particle Canvas Animation
     const bgCanvas = document.getElementById('bg-canvas');
     const ctxBg = bgCanvas.getContext('2d');
     let particles = [];
@@ -223,21 +220,19 @@
     }
     animateParticles();
 
-    // 3. Login Action + Smooth GSAP & Confetti Animation
+    // Login Action
     function handleLogin() {
       const u = document.getElementById("username").value.trim();
       const p = document.getElementById("password").value.trim();
       
-      const user = usersList.find(x => x.username === u && x.pass === p);
+      const user = usersList.find(x => String(x.username).trim() === u && String(x.pass).trim() === p);
 
       if (user) {
         currentUser = user;
         document.getElementById("error-msg").style.display = "none";
 
-        // Confetti Burst Effect
         confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
 
-        // GSAP Transition Animation
         gsap.to("#login-screen", {
           duration: 0.6,
           scale: 0.8,
@@ -260,7 +255,7 @@
       }
     }
 
-    // 4. Photo Render on Canvas
+    // Photo Render
     document.getElementById("photoInput").addEventListener("change", function(e) {
       if(!e.target.files[0]) return;
       
@@ -269,7 +264,7 @@
         const userPhoto = new Image();
         userPhoto.onload = function() {
           const masterImg = new Image();
-          masterImg.src = 'master_card.png'; // Make sure this file exists in the same folder
+          masterImg.src = 'master_card.png';
           
           masterImg.onload = function() {
             const canvas = document.getElementById("passCanvas");
@@ -278,13 +273,13 @@
             canvas.width = masterImg.width;
             canvas.height = masterImg.height;
 
-            // Draw Base Background
+            // Draw Base Card
             ctx.drawImage(masterImg, 0, 0);
 
-            // Draw User Uploaded Photo
+            // Draw User Photo
             ctx.drawImage(userPhoto, 115, 345, 350, 420);
 
-            // Draw Dynamic Name & ID Text
+            // Draw Name and ID
             ctx.fillStyle = "#FFD700";
             ctx.font = "bold 38px Poppins";
             ctx.fillText(currentUser.name, 540, 415);
@@ -293,11 +288,9 @@
             ctx.font = "bold 32px Poppins";
             ctx.fillText(currentUser.id, 540, 510);
 
-            // Show Canvas with Smooth Fade-in
             document.getElementById("canvas-wrapper").style.display = "block";
             gsap.from("#canvas-wrapper", { duration: 0.8, y: 20, opacity: 0 });
 
-            // Download Link Prepare
             const downloadBtn = document.getElementById("downloadBtn");
             downloadBtn.href = canvas.toDataURL("image/jpeg", 0.95);
             downloadBtn.download = `NG2026_${currentUser.name.replace(/\s+/g, '_')}.jpg`;
