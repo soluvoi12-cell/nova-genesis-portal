@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOVA GENESIS 2026 - Access Portal</title>
+  
+  <!-- Cool Fonts & Animation Libraries -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #05070f;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Particle Background Canvas */
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      width: 90%;
+      max-width: 450px;
+      text-align: center;
+    }
+
+    /* Glassmorphism Card Box */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 0 0 30px rgba(0, 229, 255, 0.2), inset 0 0 15px rgba(212, 175, 55, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      transition: all 0.5s ease;
+    }
+
+    .title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #FFD700, #00E5FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
+      text-shadow: 0 0 20px rgba(0,229,255,0.4);
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 25px;
+      letter-spacing: 1px;
+    }
+
+    /* Input Styles */
+    .input-group { margin-bottom: 20px; text-align: left; }
+    .input-group label { display: block; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; }
+    .input-group input {
+      width: 100%;
+      padding: 12px 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.3s;
+    }
+    .input-group input:focus {
+      border-color: #00E5FF;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    }
+
+    /* Glowing Button */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #d4af37, #00E5FF);
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+      transition: 0.3s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0, 229, 255, 0.8);
+    }
+
+    /* Portal Screen (Hidden initially) */
+    #portal-screen { display: none; opacity: 0; }
+    
+    #passCanvas {
+      width: 100%;
+      border-radius: 15px;
+      border: 2px solid #FFD700;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+      margin-top: 15px;
+    }
+
+    .file-upload-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px dashed #00E5FF;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: 0.3s;
+    }
+    .file-upload-btn:hover { background: rgba(0, 229, 255, 0.2); }
+  </style>
+</head>
+<body>
+
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="container">
+    
+    <!-- LOGIN BOX -->
+    <div id="login-screen" class="glass-card">
+      <h1 class="title">NOVA GENESIS</h1>
+      <p class="subtitle">OFFICIAL ENTRY PASS PORTAL</p>
+      
+      <div class="input-group">
+        <label>USERNAME</label>
+        <input type="text" id="username" placeholder="Enter Username">
+      </div>
+      
+      <div class="input-group">
+        <label>PASSWORD</label>
+        <input type="password" id="password" placeholder="Enter Password">
+      </div>
+      
+      <button class="btn" onclick="handleLogin()">ACCESS PASS 🚀</button>
+      <p id="error-msg" style="color:#ff4757; font-size:0.8rem; margin-top:10px; display:none;">Invalid Credentials!</p>
+    </div>
+
+    <!-- MAIN PORTAL SCREEN (After Login Animation) -->
+    <div id="portal-screen" class="glass-card">
+      <h2 id="welcome-text" class="title" style="font-size: 1.3rem;"></h2>
+      <p class="subtitle">Upload profile photo to generate pass</p>
+
+      <label class="file-upload-btn">
+        📷 Upload Your Photo
+        <input type="file" id="photoInput" accept="image/*" style="display:none;">
+      </label>
+
+      <div id="canvas-wrapper" style="display:none;">
+        <canvas id="passCanvas"></canvas>
+        <br><br>
+        <a id="downloadBtn" download="NOVA_GENESIS_PASS.jpg" style="text-decoration:none;">
+          <button class="btn">📥 DOWNLOAD PASS</button>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 1. Database of 400 Users (Add/Expand as needed)
+    const usersList = [
+      { username: "user01", pass: "pass123", name: "Rahul Sharma", id: "NG2026-001" },
+      { username: "user02", pass: "pass456", name: "Priya Singh", id: "NG2026-002" },
+      { username: "user03", pass: "pass789", name: "Aman Verma", id: "NG2026-003" }
+    ];
+
+    let currentUser = null;
+
+    // 2. Background Star Particle Effect
+    const bgCanvas = document.getElementById('bg-canvas');
+    const ctxBg = bgCanvas.getContext('2d');
+    let particles = [];
+
+    function resizeBg() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeBg);
+    resizeBg();
+
+    for(let i = 0; i < 80; i++) {
+      particles.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        radius: Math.random() * 2,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5
+      });
+    }
+
+    function animateParticles() {
+      ctxBg.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      ctxBg.fillStyle = 'rgba(0, 229, 255, 0.7)';
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if(p.x < 0 || p.x > bgCanvas.width) p.vx *= -1;
+        if(p.y < 0 || p.y > bgCanvas.height) p.vy *= -1;
+        ctxBg.beginPath();
+        ctxBg.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctxBg.fill();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // 3. Login Action + Smooth GSAP & Confetti Animation
+    function handleLogin() {
+      const u = document.getElementById("username").value.trim();
+      const p = document.getElementById("password").value.trim();
+      
+      const user = usersList.find(x => x.username === u && x.pass === p);
+
+      if (user) {
+        currentUser = user;
+        document.getElementById("error-msg").style.display = "none";
+
+        // Confetti Burst Effect
+        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+
+        // GSAP Transition Animation
+        gsap.to("#login-screen", {
+          duration: 0.6,
+          scale: 0.8,
+          opacity: 0,
+          onComplete: () => {
+            document.getElementById("login-screen").style.display = "none";
+            const portal = document.getElementById("portal-screen");
+            portal.style.display = "block";
+            document.getElementById("welcome-text").innerText = `WELCOME, ${user.name.toUpperCase()}`;
+            
+            gsap.fromTo(portal, 
+              { scale: 0.8, opacity: 0 }, 
+              { duration: 0.8, scale: 1, opacity: 1, ease: "back.out(1.7)" }
+            );
+          }
+        });
+      } else {
+        document.getElementById("error-msg").style.display = "block";
+        gsap.fromTo("#login-screen", { x: -10 }, { duration: 0.1, x: 10, repeat: 5, yoyo: true });
+      }
+    }
+
+    // 4. Photo Render on Canvas
+    document.getElementById("photoInput").addEventListener("change", function(e) {
+      if(!e.target.files[0]) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const userPhoto = new Image();
+        userPhoto.onload = function() {
+          const masterImg = new Image();
+          masterImg.src = 'master_card.png'; // Make sure this file exists in the same folder
+          
+          masterImg.onload = function() {
+            const canvas = document.getElementById("passCanvas");
+            const ctx = canvas.getContext("2d");
+
+            canvas.width = masterImg.width;
+            canvas.height = masterImg.height;
+
+            // Draw Base Background
+            ctx.drawImage(masterImg, 0, 0);
+
+            // Draw User Uploaded Photo
+            ctx.drawImage(userPhoto, 115, 345, 350, 420);
+
+            // Draw Dynamic Name & ID Text
+            ctx.fillStyle = "#FFD700";
+            ctx.font = "bold 38px Poppins";
+            ctx.fillText(currentUser.name, 540, 415);
+
+            ctx.fillStyle = "#FFFFFF";
+            ctx.font = "bold 32px Poppins";
+            ctx.fillText(currentUser.id, 540, 510);
+
+            // Show Canvas with Smooth Fade-in
+            document.getElementById("canvas-wrapper").style.display = "block";
+            gsap.from("#canvas-wrapper", { duration: 0.8, y: 20, opacity: 0 });
+
+            // Download Link Prepare
+            const downloadBtn = document.getElementById("downloadBtn");
+            downloadBtn.href = canvas.toDataURL("image/jpeg", 0.95);
+            downloadBtn.download = `NG2026_${currentUser.name.replace(/\s+/g, '_')}.jpg`;
+          };
+        };
+        userPhoto.src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    });
+  </script>
+</body>
+</html>
